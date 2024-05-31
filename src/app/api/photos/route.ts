@@ -12,10 +12,16 @@ export async function GET() {
     const res = await fetch(`https://picsum.photos/v2/list?page=${page}&limit=9`);
     const photosList: Photo[] = await res.json();
 
-    return Response.json(photosList.map(photo => {
+    const photosWithActualURL = photosList.map(photo => {
         return {
             ...photo,
             url: `${photo.download_url.replace(/\/\d+\/\d+$/, `/${309}`)}.webp`,
         };
-    }));
+    });
+
+    const headers = {
+        'Cache-Control': 'no-store, max-age=0',
+    };
+
+    return new Response(JSON.stringify(photosWithActualURL), { headers });
 }
