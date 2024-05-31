@@ -1,95 +1,123 @@
+"use client";
+
 import Image from "next/image";
 import styles from "./page.module.css";
+import { useEffect, useState } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
+
+interface Photo {
+  id: string;
+  width: number;
+  height: number;
+  url: string;
+}
+
+interface HashTagLogo {
+  url: string;
+}
 
 export default function Home() {
+  const [hashTagLogo, setHashTagLogo] = useState<HashTagLogo>({
+    url: "",
+  });
+  const [photos, setPhotos] = useState<Photo[]>([]);
+
+  useEffect(() => {
+    loadHashtagLogo();
+    loadPhotos();
+  }, []);
+
+  const loadHashtagLogo = () => {
+    fetch("api/hashtag-logo")
+    .then(res => res.json())
+    .then(data => {
+      setHashTagLogo(data);
+    });
+  };
+
+  const loadPhotos = () => {
+    fetch("/api/photos")
+      .then(res => res.json())
+      .then(data => {
+        setPhotos([...photos, ...data]);
+      });
+  };
+
+  const galleryPhotos = photos.map(photo => (
+    <Image
+      key={photo.id}
+      src={photo.url}
+      alt="gallery photo"
+      width={309}
+      height={309}
+    />
+  ));
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <>
+      <nav>
+        <div className={styles.navbar}>
+          <div className={styles.navbarWrapper}>
+            <div className={styles.navLogo}>
+              <Image
+                src="/instagram.svg"
+                alt="Instagram Logo"
+                width={103}
+                height={36}
+                priority
+              />
+            </div>
+            <div className={styles.navLogin}>
+            </div>
+          </div>
         </div>
-      </div>
+      </nav>
+      <main className={styles.main}>
+        <header className={styles.header}>
+          <div>
+            {hashTagLogo.url && 
+              <Image
+                className={styles.hashTagLogo}
+                src={hashTagLogo.url}
+                alt="Hashtag Logo"
+                width={150}
+                height={150}
+                priority
+              />
+            }
+          </div>
+          <div className={styles.hashTagWrapper}>
+            <div className={styles.hashTagContent}>
+              <div className={styles.hashTag}>#houseplants</div>
+              <div>
+                <span className={styles.hashTagCounts}>10,690,803 </span>posts
+              </div>
+            </div>
+          </div>
+        </header>
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+        <article className={styles.article}>
+          <div className={styles.galleryWrapper}>
+            <div className={styles.galleryTitle}>Top posts</div>
+            <div>
+              <InfiniteScroll
+                dataLength={photos.length}
+                next={loadPhotos}
+                hasMore={true}
+                loader={<h4>...</h4>}
+              >
+                <div className={styles.gallery}>
+                  {galleryPhotos}
+                </div>
+              </InfiniteScroll>
+            </div>
+          </div>
+          
+        </article>
+      </main>
+      <footer>
+        footer links
+      </footer>
+    </>
   );
 }
