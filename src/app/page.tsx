@@ -21,6 +21,7 @@ export default function Home() {
     url: "",
   });
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [page, setPage] = useState<number>(1);
 
   useEffect(() => {
     loadHashtagLogo();
@@ -36,10 +37,11 @@ export default function Home() {
   };
 
   const loadPhotos = () => {
-    fetch("/api/photos")
+    fetch(`/api/photos?page=${page}`)
       .then(res => res.json())
       .then(data => {
         setPhotos([...photos, ...data]);
+        setPage(page + 1);
       });
   };
 

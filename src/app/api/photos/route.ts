@@ -6,22 +6,20 @@ interface Photo {
     download_url: string;
 }
 
-export async function GET() {
-    const page = Math.floor(Math.random() * 100) + 1;
+const randomNumber = Math.floor(Math.random() * 100) + 1;
+
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url);
+    const pageNum = searchParams.get('page');
+    const page = randomNumber + Number(pageNum);
     
     const res = await fetch(`https://picsum.photos/v2/list?page=${page}&limit=9`);
     const photosList: Photo[] = await res.json();
 
-    const photosWithActualURL = photosList.map(photo => {
+    return Response.json(photosList.map(photo => {
         return {
             ...photo,
             url: `${photo.download_url.replace(/\/\d+\/\d+$/, `/${309}`)}.webp`,
         };
-    });
-
-    const headers = {
-        'Cache-Control': 'no-store, max-age=0',
-    };
-
-    return new Response(JSON.stringify(photosWithActualURL), { headers });
+    }));
 }
